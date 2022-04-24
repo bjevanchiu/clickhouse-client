@@ -42,7 +42,11 @@ module Clickhouse
 
       def ensure_authentication
         username, password = @config.values_at(:username, :password)
-        client.basic_auth(username || "default", password) if username || password
+        if client.methods.include?(:basic_auth)
+          client.basic_auth(username || "default", password) if username || password
+        else
+          client.request(:basic_auth, username || "default", password)  if username || password
+        end
       end
 
       def path(query)
